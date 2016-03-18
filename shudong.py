@@ -16,7 +16,7 @@ class MyThread(threading.Thread):
 			g_mutex.acquire()
 			count += 1
 			g_mutex.release()
-			if count > 200: break;
+			if count > 1000: break;
 			data = self.catch_data_from_page(count)
 			result.extend(data)
 		g_mutex_2.acquire()
@@ -56,7 +56,7 @@ class MyThread(threading.Thread):
 			return contents
 
 file_handle = open('shudong.txt', 'w')
-words = ['']
+words = []
 g_mutex = threading.Lock()
 g_mutex_2 = threading.Lock()
 count = 0
@@ -64,7 +64,7 @@ count = 0
 def find_hot():
 	global count
 	pool = []
-	for i in xrange(20):
+	for i in xrange(50):
 		t = MyThread()
 		t.start()
 		pool.append(t)
