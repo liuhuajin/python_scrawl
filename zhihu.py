@@ -17,6 +17,20 @@ class image_catcher(object):
 		s.post('http://www.zhihu.com/login', login_data)
 		return s
 	
+	def get_search_result(self, key_word):
+		url = 'http://www.zhihu.com/search?type=content&q=' + key_word
+		print url
+		search_result = requests.get(url, headers =self.headers)
+		search_content = search_result.content
+		search_soup = BeautifulSoup(search_content, 'lxml')
+		results = search_soup.find_all('a')
+		for r in results:
+			if r.get('target') == '_blank':
+				href = r.get('href')
+				print href
+				answer_url = 'www.zhihu.com' + href
+				self.get_image_contents(answer_url)
+	
 	def get_image_contents(url):
 		r = self.s.get(url)
 		content = r.content
