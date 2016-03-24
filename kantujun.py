@@ -18,7 +18,7 @@ class ImageCatcher(object):
 	
 	def walk_url(self, url):
 		print 'start walk url:%s'%url
-		response = requests.get(url)
+		response = requests.get(url, timeout=3)
 		name_first = re.search('page=(.*)', url).group(1)
 		content = response.content
 		soup = BeautifulSoup(content, 'html.parser')
@@ -26,13 +26,13 @@ class ImageCatcher(object):
 		for tag in tags:
 			src = tag.get('src')
 			if not src:return
-			img_response = requests.get(src)
+			img_response = requests.get(src, timeout=3)
 			name = self.path + name_first + '_' + src[-13:]
 			with open(name, 'wb') as f:
 				f.write(img_response.content)
 	
 	def walks_all(self):
-		pool = threadpool.ThreadPool(4)
+		pool = threadpool.ThreadPool(8)
 		urls = [self.start_url + str(page) for page in xrange(1, self.num)]
 		reqs = threadpool.makeRequests(lambda url:self.walk_url(url), urls)
 		[pool.putRequest(req) for req in reqs]
