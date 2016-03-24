@@ -2,15 +2,18 @@ import requests
 from bs4 import BeautifulSoup
 import threadpool
 import re
+import os
 
 class ImageCatcher(object):
 	def __init__(self):
 		self.start_url = None
 		self.num = 0
 
-	def set_start_url(self, url, num):
+	def set_start_url(self, url, num, path):
 		self.start_url = url
 		self.num = num
+		os.mkdir(path)
+		self.path = path
 	
 	def walk_url(self, url):
 		print 'start walk url:%s'%url
@@ -23,7 +26,7 @@ class ImageCatcher(object):
 			src = tag.get('src')
 			if not src:return
 			img_response = requests.get(src)
-			name = './image/' + name_first + '_' + src[-13:]
+			name = self.path + name_first + '_' + src[-13:]
 			with open(name, 'wb') as f:
 				f.write(img_response.content)
 	
@@ -38,5 +41,6 @@ if __name__ == '__main__':
 	ic = ImageCatcher()
 	url = 'http://www.xxxxx.com/index/douban?page='
 	num = 86
-	ic.set_start_url(url, num)
+	path = './kantujun'
+	ic.set_start_url(url, num, path)
 	ic.walks_all()
