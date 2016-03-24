@@ -12,7 +12,8 @@ class ImageCatcher(object):
 	def set_start_url(self, url, num, path):
 		self.start_url = url
 		self.num = num
-		os.mkdir(path)
+		if not os.path.exists(os.path.join(os.getcwd(),path)):
+			os.mkdir(path)
 		self.path = path
 	
 	def walk_url(self, url):
@@ -39,8 +40,8 @@ class ImageCatcher(object):
 
 if __name__ == '__main__':
 	ic = ImageCatcher()
-	url = 'http://www.xxxxx.com/index/douban?page='
+	url = 'http://www.xxxx.com/index/douban?page='
 	num = 86
-	path = './kantujun'
+	path = './image/'
 	ic.set_start_url(url, num, path)
 	ic.walks_all()
