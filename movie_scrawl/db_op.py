@@ -5,6 +5,7 @@ class DBOperation(object):
 	def __init__(self, host, port):
 		self.host = host
 		self.prot = port
-	
+		self.client = None
+
 	def get_client(self):
-		pass
+		self.client = MongoClient('localhost', 3000)
