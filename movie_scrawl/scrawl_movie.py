@@ -10,7 +10,11 @@ class MovieScrawl(object):
 		try:
 			print 'start scrawl %s'%url
 			url_response = requests.get(url, timeout=5)
-			print url_response.status_code	
+			if not url_response.status_code == 200:
+                            self.retry_list.append(url)
+                        else:
+                            content = url_response.content
+                            soup = BeautifulSoup(content, 'html.parser')
 		except:
 			pass
 	
