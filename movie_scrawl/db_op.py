@@ -31,7 +31,7 @@ class MySQLDBO(object):
 		self._user_name = conf.get('mysql_config', 'user_name')
 		self._password = conf.get('mysql_config', 'password')
 		self._db_name = conf.get('mysql_config', 'db_name')
-		self.mysql_db = MySQLdb.connect(self._host, self._user_name, self._password, self._db_name)
+		self.db = MySQLdb.connect(self._host, self._user_name, self._password, self._db_name)
 
 if __name__ == '__main__':
 	db_1 = MongoDBO()
