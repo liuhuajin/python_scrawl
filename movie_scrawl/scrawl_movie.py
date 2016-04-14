@@ -25,7 +25,7 @@ class MovieScrawl(object):
 				self.retry_list.append(url)
 			else:
 				content = url_response.content
-				self.parse_content(content)
+				movie_attr_list = self.parse_content(content)
 		except:
 			import traceback
 			traceback.print_exc()
@@ -34,22 +34,34 @@ class MovieScrawl(object):
 	def parse_content(self, content):
 		soup = BeautifulSoup(content, 'html.parser')
 		movie_list = soup.find_all('div',class_='home-list-item-left')
+		movie_attr_list = []
 		for movie in movie_list:
-			link = movie.a['href']
-			spans = movie.a.find_all('span')	
-			tag = spans[0].text
-			size = spans[1].text
-			name_and_actors = movie.p.text
-			pattern = re.compile(u'影片名称: (.*)  - 主演：(.*)')
-			match = pattern.match(name_and_actors)
+			link = None
+			tag = None
+			size = None
+			name = None
+			actors = None
 			try:
+				link = movie.a['href']
+				spans = movie.a.find_all('span')	
+				tag = spans[0].text
+				size = spans[1].text
+				name_and_actors = movie.p.text
+				pattern = re.compile(u'影片名称: (.*)  - 主演：(.*)')
+				match = pattern.match(name_and_actors)
 				name = match.groups()[0]
 				actors = match.groups()[1]
 				print '--------'
 				print name
 				print actors
 			except:
-				pass
+				import traceback
+				traceback.print_exc()
+			finally:
+				movie_attr = [link, tag, size, name, actors] if link and tag and size and name and actors else []
+			if movie_attr:
+				movie_attr_list.append(movie_attr)
+		return movie_attr_list
 
 	def start_scrawl(self):
 		pool = threadpool.ThreadPool(8)
