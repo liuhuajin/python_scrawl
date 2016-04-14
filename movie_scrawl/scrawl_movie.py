@@ -15,8 +15,9 @@ class MovieScrawl(object):
 		self.mysql_db = db_op.MySQLDBO()
 		self.cursor = self.mysql_db.db.cursor()
 		self.cursor.execute('drop table if exists movie_info')
-		sql = 'create table movie_info (name char(100), des char(200), link char(100), tag char(30), size char(30))'
+		sql = 'create table movie_info (name char(100), link char(100), tag char(30), size char(30), actors varchar(500))'
 		self.cursor.execute(sql)
+		self.mysql_db.commit()
 	def scrawl_url(self, url):
 		try:
 			print 'start scrawl %s'%url
@@ -58,10 +59,20 @@ class MovieScrawl(object):
 				import traceback
 				traceback.print_exc()
 			finally:
-				movie_attr = [link, tag, size, name, actors] if link and tag and size and name and actors else []
+				movie_attr = [name, link, tag, size, actors] if link and tag and size and name and actors else []
 			if movie_attr:
 				movie_attr_list.append(movie_attr)
 		return movie_attr_list
+
+	def save_movie(self, movie_attr_list):
+		for movie_attr in movie_attr_list:
+			sql = """
+			insert movie_info (name, link, tag, size, actors)
+			values
+			(movie_attr[0], movie_attr[1], movie_attr[2], movie_attr[3], movie_attr[4])
+			"""
+			self.cursor.execute(sql)
+			self.mysql_db.commit()
 
 	def start_scrawl(self):
 		pool = threadpool.ThreadPool(8)
