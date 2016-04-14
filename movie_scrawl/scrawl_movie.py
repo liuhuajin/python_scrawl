@@ -1,7 +1,10 @@
+#-*- encoding:utf-8 -*-
 import requests
 import threadpool
 import db_op
 from bs4 import BeautifulSoup
+import sys
+import re
 
 class MovieScrawl(object):
 	def __init__(self, url, pages):
@@ -34,15 +37,19 @@ class MovieScrawl(object):
 		for movie in movie_list:
 			link = movie.a['href']
 			spans = movie.a.find_all('span')	
-			tag = unicode(spans[0].string)
-			size = unicode(spans[1].string)
-			name_and_actors = unicode(movie.p.string)
-			print '-----------'
-			print link
-			print tag
-			print size
-			print name_and_actors
-
+			tag = spans[0].text
+			size = spans[1].text
+			name_and_actors = movie.p.text
+			pattern = re.compile(u'影片名称: (.*)  - 主演：(.*)')
+			match = pattern.match(name_and_actors)
+			try:
+				name = match.groups()[0]
+				actors = match.groups()[1]
+				print '--------'
+				print name
+				print actors
+			except:
+				pass
 
 	def start_scrawl(self):
 		pool = threadpool.ThreadPool(8)
