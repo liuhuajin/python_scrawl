@@ -10,12 +10,13 @@ class MovieScrawl(object):
     def __init__(self, url, pages):
         self.start_url = url
         self.total_pages = pages
+        self.pre_link = 'bt0.com'
         self.retry_list = []
         self.mongo_db = db_op.MongoDBO() 
         self.mysql_db = db_op.MySQLDBO()
         self.cursor = self.mysql_db.db.cursor()
         self.cursor.execute('drop table if exists movie_info')
-        sql = 'create table movie_info (name char(100), link char(100), tag char(30), size char(30), actors varchar(500)) default charset=utf8'
+        sql = 'create table movie_info (name char(100), link char(100), tag char(30), size decimal(8,3), actors varchar(500)) default charset=utf8'
         self.cursor.execute(sql)
         self.mysql_db.db.commit()
     def scrawl_url(self, url):
@@ -44,10 +45,11 @@ class MovieScrawl(object):
             name = None
             actors = None
             try:
-                link = movie.a['href'].encode('utf-8')
+                link = (self.pre_link + movie.a['href']).encode('utf-8')
                 spans = movie.a.find_all('span')    
                 tag = spans[0].text.encode('utf-8')
-                size = spans[1].text.encode('utf-8')
+                size_str = spans[1].text.encode('utf-8')
+                size = self.get_size_from_str(size_str)
                 name_and_actors = movie.p.text
                 pattern = re.compile(u'影片名称: (.*)  - 主演：(.*)')
                 match = pattern.match(name_and_actors)
@@ -62,13 +64,29 @@ class MovieScrawl(object):
                 movie_attr_list.append(movie_attr)
         return movie_attr_list
 
+    def get_size_from_str(self, size_str):
+        size = 0
+        try:
+            size_pattern = re.compile('(\d+\.*\d*)(.*)')
+            match = size_pattern.match(size_str)
+            if match:
+                size = float(match.groups()[0])
+                size_type = match.groups()[1]
+                if 'm' in size_type or 'M' in size_type:
+                    size /= 1000
+        except:
+            pass
+        finally:
+            print size
+            return size
+
     def save_movie(self, movie_attr_list):
         for movie_attr in movie_attr_list:
             try:
-                attr_format = [MySQLdb.escape_string(attr) for attr in movie_attr]
+                attr_format = [MySQLdb.escape_string(attr) if type(attr) == str else attr for attr in movie_attr]
                 sql = " insert movie_info (name, link, tag, size, actors)\
                 values\
-                ('%s', '%s', '%s', '%s', '%s') "%(attr_format[0], attr_format[1], attr_format[2], attr_format[3], attr_format[4])
+                ('%s', '%s', '%s', '%d', '%s') "%(attr_format[0], attr_format[1], attr_format[2], attr_format[3], attr_format[4])
                 self.cursor.execute(sql)
                 self.mysql_db.db.commit()
             except:
