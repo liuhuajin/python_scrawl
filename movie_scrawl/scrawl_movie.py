@@ -15,7 +15,7 @@ class MovieScrawl(object):
         self.mysql_db = db_op.MySQLDBO()
         self.cursor = self.mysql_db.db.cursor()
         self.cursor.execute('drop table if exists movie_info')
-        sql = 'create table movie_info (name char(100), link char(100), tag char(30), size char(30), actors varchar(500))'
+        sql = 'create table movie_info (name char(100), link char(100), tag char(30), size char(30), actors varchar(500)) default charset=utf8'
         self.cursor.execute(sql)
         self.mysql_db.db.commit()
     def scrawl_url(self, url):
